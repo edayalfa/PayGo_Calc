@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hammer Utilization & Pricing Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #f3f4f6, #e5e7eb); /* from-gray-100 to-gray-200 */
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-4xl border border-gray-200 my-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-6">
+            Hammer Utilization & Pricing Calculator
+        </h1>
+
+        <form id="utilization-form" onsubmit="return false;">
+
+            <section class="mb-8">
+                 <label for="contract-length" class="block text-sm font-medium text-gray-700">Select Contract Length:</label>
+                 <select id="contract-length" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition shadow-sm bg-white">
+                     <option value="3">3 Months</option>
+                     <option value="6">6 Months</option>
+                     <option value="12" selected>12 Months</option>
+                     <option value="24">24 Months</option>
+                     <option value="36">36 Months</option>
+                     <option value="48">48 Months</option>
+                     <option value="60">60 Months</option>
+                 </select>
+            </section>
+            
+            <section class="mb-8 p-6 bg-gray-50 rounded-xl border border-gray-200 shadow-inner">
+                <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Section 1: VoiceWatch</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Do you require VoiceWatch Proactive Monitoring?</label>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="voicewatch-required" value="no" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" checked>
+                            <span class="ml-2 text-gray-800">No</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="voicewatch-required" value="yes" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                            <span class="ml-2 text-gray-800">Yes</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="voicewatch-details" class="hidden border-t border-gray-200 pt-4 mt-4">
+                    <h3 class="text-md font-semibold text-gray-700 mb-3">Monitoring Groups</h3>
+                    <div id="monitoring-groups-container" class="space-y-4">
+                        </div>
+                    <button type="button" id="add-monitoring-group" class="mt-4 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                        + Add Monitoring Group
+                    </button>
+                </div>
+            </section>
+
+            <section class="mb-8 p-6 bg-gray-50 rounded-xl border border-gray-200 shadow-inner">
+                <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Section 2: Performance Test</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="perf-tests-quarter" class="block text-sm font-medium text-gray-700">Number of 90-min tests per quarter:</label>
+                        <input type="number" id="perf-tests-quarter" value="0" min="0" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition shadow-sm">
+                    </div>
+                    <div>
+                        <label for="perf-peak-calls" class="block text-sm font-medium text-gray-700">Concurrent calls at peak volume:</label>
+                        <input type="number" id="perf-peak-calls" value="0" min="0" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition shadow-sm">
+                    </div>
+                </div>
+            </section>
+
+            <div class="mt-8 pt-6 border-t-2 border-blue-200">
+                <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Pricing Summary</h2>
+                
+                <div class="bg-blue-50 p-6 rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center md:text-left">
+                        <div>
+                            <span class="text-sm text-gray-500 font-medium">Usage SKU</span>
+                            <p id="sku-display" class="text-base font-mono bg-gray-200 text-gray-700 py-1 px-2 rounded mt-1">HCP-PAYGO-CONS-500+</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500 font-medium">Platform SKU</span>
+                            <p id="platform-sku-display" class="text-base font-mono bg-gray-200 text-gray-700 py-1 px-2 rounded mt-1">HCP-PAYGO-MNTH-BRZ</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <span class="text-lg font-medium text-gray-800">Total Contract Price</span>
+                        <p id="total-contract-price" class="text-4xl font-extrabold text-blue-800">$0.00</p>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button type="button" id="toggle-details-btn" class="text-blue-600 hover:underline font-semibold text-sm">
+                        Show Price Details &darr;
+                    </button>
+                </div>
+                
+                <div id="pricing-details-container" class="hidden mt-4 border-t pt-4 space-y-3 text-lg">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Total Monthly Minutes:</span>
+                        <span id="total-minutes" class="font-semibold text-gray-800">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Price Per Minute (Tiered):</span>
+                        <span id="price-per-minute" class="font-semibold text-gray-800">$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Base Monthly Usage Price:</span>
+                        <span id="base-monthly-price" class="font-semibold text-gray-800">$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Contract Term Adjustment (<span id="term-adjustment-percent">0%</span>):</span>
+                        <span id="term-adjustment-amount" class="font-semibold text-gray-800">$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Platform Fee (<span id="platform-fee-sku">HCP-PAYGO-MNTH-BRZ</span>):</span>
+                        <span id="platform-fee" class="font-semibold text-gray-800">$500.00</span>
+                    </div>
+                    <hr class="my-2 border-gray-300">
+                    <div class="flex justify-between items-center text-xl font-bold pt-2">
+                        <span>Total Monthly Price:</span>
+                        <span id="total-monthly-price" class="text-blue-700">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('utilization-form');
+            const voicewatchToggle = document.querySelectorAll('input[name="voicewatch-required"]');
+            const voicewatchDetails = document.getElementById('voicewatch-details');
+            const addGroupButton = document.getElementById('add-monitoring-group');
+            const groupsContainer = document.getElementById('monitoring-groups-container');
+            const toggleBtn = document.getElementById('toggle-details-btn');
+            const detailsContainer = document.getElementById('pricing-details-container');
+
+            // --- Event Listeners ---
+            form.addEventListener('input', calculateTotal);
+            form.addEventListener('change', calculateTotal);
+
+            // **FIXED**: This listener connects the "Add Group" button to its function.
+            addGroupButton.addEventListener('click', addMonitoringGroup);
+
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = detailsContainer.classList.toggle('hidden');
+                toggleBtn.innerHTML = isHidden ? 'Show Price Details &darr;' : 'Hide Price Details &uarr;';
+            });
+            
+            voicewatchToggle.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'yes') {
+                        voicewatchDetails.classList.remove('hidden');
+                        if (groupsContainer.children.length === 0) {
+                           addMonitoringGroup();
+                        }
+                    } else {
+                        voicewatchDetails.classList.add('hidden');
+                    }
+                    calculateTotal();
+                });
+            });
+
+            // --- Calculation Logic ---
+            const PLATFORM_FEE = 500;
+            const PLATFORM_SKU = 'HCP-PAYGO-MNTH-BRZ';
+            const contractTermModifiers = {
+                3: { multiplier: 1.10, label: "+10%" },
+                6: { multiplier: 1.05, label: "+5%" },
+                12: { multiplier: 1.00, label: "0%" },
+                24: { multiplier: 0.95, label: "-5%" },
+                36: { multiplier: 0.90, label: "-10%" },
+                48: { multiplier: 0.85, label: "-15%" },
+                60: { multiplier: 0.80, label: "-20%" }
+            };
+
+            function getPricingTier(minutes) {
+                if (minutes >= 400000) return { price: 0.09,  sku: 'HCP-PAYGO-CONS-400k+' };
+                if (minutes >= 300000) return { price: 0.10,  sku: 'HCP-PAYGO-CONS-300k+' };
+                if (minutes >= 200000) return { price: 0.11,  sku: 'HCP-PAYGO-CONS-200k+' };
+                if (minutes >= 100000) return { price: 0.115, sku: 'HCP-PAYGO-CONS-100k+' };
+                if (minutes >= 50000)  return { price: 0.12,  sku: 'HCP-PAYGO-CONS-50k+'  };
+                if (minutes > 0)       return { price: 0.15,  sku: 'HCP-PAYGO-CONS-500+'  };
+                return { price: 0.15, sku: 'HCP-PAYGO-CONS-500+' }; // Default for 0 minutes
+            }
+
+            // --- Main Calculation Function ---
+            function calculateTotal() {
+                // 1. Calculate total minutes
+                const voicewatchMinutes = calculateVoiceWatch();
+                const performanceMinutes = calculatePerformanceTest();
+                const totalMinutes = voicewatchMinutes + performanceMinutes;
+
+                // 2. Get the tiered pricing object (price and sku) for usage
+                const tier = getPricingTier(totalMinutes);
+                const costPerMinute = tier.price;
+                const skuName = tier.sku;
+                const baseMonthlyPrice = totalMinutes * costPerMinute;
+
+                // 3. Apply contract term modifier to the usage price
+                const selectedTerm = document.getElementById('contract-length').value;
+                const modifier = contractTermModifiers[selectedTerm];
+                const adjustedUsagePrice = baseMonthlyPrice * modifier.multiplier;
+                const termAdjustmentAmount = adjustedUsagePrice - baseMonthlyPrice;
+
+                // 4. Add the mandatory platform fee
+                const totalMonthlyPrice = adjustedUsagePrice + PLATFORM_FEE;
+
+                // 5. Calculate Total Contract Price
+                const totalContractPrice = totalMonthlyPrice * selectedTerm;
+
+                // 6. Update UI
+                const minuteFormatter = new Intl.NumberFormat('en-US');
+                const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
+                // Update prominent display
+                document.getElementById('sku-display').textContent = skuName; // **FIXED**: This now updates dynamically.
+                document.getElementById('platform-sku-display').textContent = PLATFORM_SKU;
+                document.getElementById('total-contract-price').textContent = currencyFormatter.format(totalContractPrice);
+
+                // Update hidden details
+                document.getElementById('total-minutes').textContent = minuteFormatter.format(totalMinutes.toFixed(0));
+                document.getElementById('price-per-minute').textContent = currencyFormatter.format(costPerMinute, {minimumFractionDigits: 3});
+                document.getElementById('base-monthly-price').textContent = currencyFormatter.format(baseMonthlyPrice);
+                document.getElementById('term-adjustment-percent').textContent = modifier.label;
+                document.getElementById('term-adjustment-amount').textContent = currencyFormatter.format(termAdjustmentAmount);
+                document.getElementById('platform-fee-sku').textContent = PLATFORM_SKU;
+                document.getElementById('platform-fee').textContent = currencyFormatter.format(PLATFORM_FEE);
+                document.getElementById('total-monthly-price').textContent = currencyFormatter.format(totalMonthlyPrice);
+            }
+
+            // --- Helper & UI Functions (Unchanged) ---
+            function addMonitoringGroup() {
+                const newGroup = document.createElement('div');
+                newGroup.className = 'p-4 bg-white rounded-lg border border-gray-300 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-center relative';
+                newGroup.innerHTML = `
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600"># of Phone Numbers</label>
+                        <input type="number" value="1" min="1" class="group-input mt-1 w-full p-2 border border-gray-300 rounded-md shadow-sm" data-type="phones">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600">Test Frequency</label>
+                        <select class="group-input mt-1 w-full p-2 border border-gray-300 rounded-md shadow-sm" data-type="frequency">
+                            <option value="15">Every 15+ min</option>
+                            <option value="5">Every 5 min</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600">Test Type</label>
+                        <select class="group-input mt-1 w-full p-2 border border-gray-300 rounded-md shadow-sm" data-type="test-type">
+                            <option value="connect">Connect only</option>
+                            <option value="ivr">Full IVR</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="button" class="remove-group-btn text-red-500 hover:text-red-700 font-semibold py-2 px-3 rounded-md">&times; Remove</button>
+                    </div>
+                `;
+                groupsContainer.appendChild(newGroup);
+                newGroup.querySelector('.remove-group-btn').addEventListener('click', () => {
+                    newGroup.remove();
+                    calculateTotal();
+                });
+                calculateTotal();
+            }
+
+            function calculateVoiceWatch() {
+                if (document.querySelector('input[name="voicewatch-required"]:checked').value === 'no') return 0;
+                let totalMinutes = 0;
+                const groups = document.querySelectorAll('#monitoring-groups-container > div');
+                groups.forEach(group => {
+                    const phones = parseFloat(group.querySelector('[data-type="phones"]').value) || 0;
+                    const frequency = parseInt(group.querySelector('[data-type="frequency"]').value);
+                    const testType = group.querySelector('[data-type="test-type"]').value;
+                    const testDuration = (testType === 'ivr') ? 3 : 1;
+                    const testsPerHour = (frequency === 5) ? 12 : 4;
+                    const testsPerDay = testsPerHour * 24;
+                    const daysInMonth = 30;
+                    totalMinutes += phones * testsPerDay * testDuration * daysInMonth;
+                });
+                return totalMinutes;
+            }
+
+            function calculatePerformanceTest() {
+                const testsPerQuarter = parseFloat(document.getElementById('perf-tests-quarter').value) || 0;
+                const peakCalls = parseFloat(document.getElementById('perf-peak-calls').value) || 0;
+                if (testsPerQuarter === 0 || peakCalls === 0) return 0;
+                const minutesPerTest = 61.875 * peakCalls;
+                return (testsPerQuarter * minutesPerTest) / 3;
+            }
+            
+            // Initial calculation on page load
+            calculateTotal();
+        });
+    </script>
+</body>
+</html>
